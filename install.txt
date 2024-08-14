@@ -1,0 +1,11 @@
+#Buat file bernama Dockerfile  
+FROM nginx:alpine
+RUN apk add --no-cache git
+RUN rm -rf /usr/share/nginx/html/* && git clone https://github.com/haratago/under-construction.git /usr/share/nginx/html
+EXPOSE 80
+
+# Bangun Image Docker
+docker build -t underweb .
+
+# Jalankan Container Docker
+docker run -d -p 80:80 --name container-underweb underweb
