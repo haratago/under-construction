@@ -1,11 +1,37 @@
 #Buat file bernama Dockerfile  
 FROM nginx:alpine
-RUN apk add --no-cache git
+RUN apk add --no-cache git certbot-nginx nano
 RUN rm -rf /usr/share/nginx/html/* && git clone https://github.com/haratago/under-construction.git /usr/share/nginx/html
 EXPOSE 80
+EXPOSE 443
 
 # Bangun Image Docker
 docker build -t underweb .
-
 # Jalankan Container Docker
-docker run -d -p 80:80 --name container-underweb underweb
+docker run -d -p 80:80 -p 443:443 --name container-underweb underweb
+
+docker exec -it container-underweb /bin/sh
+certbot --nginx
+
+# config ssl
+server {
+    listen 443 ssl;
+    server_name haratago.id www.haratago.id;
+
+    ssl_certificate /etc/letsencrypt/live/haratago.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/haratago.id/privkey.pem;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+    }
+}
+
+server {
+    listen 80;
+    server_name haratago.id www.haratago.id;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
